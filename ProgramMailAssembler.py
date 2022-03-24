@@ -1,9 +1,7 @@
 from __future__ import annotations
 from typing import Optional
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from datetime import datetime
 
 from HelpersPackage import FindAnyBracketedText
 
@@ -11,7 +9,7 @@ from HelpersPackage import FindAnyBracketedText
 def main():
     # Open the schedule markup file
     markuplines=""
-    with open("../ProgramAnalyzer/reports/Program participant schedules markup.txt", "r") as file:
+    with open("Program participant schedules markup.txt", "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
@@ -39,13 +37,14 @@ def main():
     # Now we have the whole schmeer in a hierarchical structure
     # Generate the output
     with open("Program participant schedules email.txt", "w") as file:
+        print(f"# {datetime.now()}\n", file=file)
         for person in main:
             fullname=""
-            email=""
+            emailAddr=""
             items=""
             for attribute in person.List:
                 if attribute.Key == "email":
-                    email=attribute.Text
+                    emailAddr=attribute.Text
                     continue
                 if attribute.Key == "fullname":
                     fullname=attribute.Text
@@ -66,7 +65,13 @@ def main():
                         item+=f"{precis}\n"
                     items=items+item+"\n"
                     continue
-            print(f"\n\n\nDear {fullname}\n{email}\n\nHere's yer schedule:\n{items}", file=file)
+            print(f"<email>", file=file)
+            print(f"<email-address>{emailAddr}</email-address>", file=file)
+            print(f"<content>", file=file)
+            print(f"Dear {fullname}\nHere's yer schedule:\n{items}", file=file)
+            print(f"</content>", file=file)
+            print(f"</email>\n\n", file=file)
+
 
 
 
