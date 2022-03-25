@@ -26,7 +26,7 @@ def main():
     # <item>iiii</item>
     # <item>iiii</item>
 
-    # Each item is:
+    # Each iiii is:
     # <title>ttt</title>
     # <participants>pppp</participants>
     # <precis>yyyyy</precis>
