@@ -68,7 +68,7 @@ def main():
             print(f"<email>", file=file)
             print(f"<email-address>{emailAddr}</email-address>", file=file)
             print(f"<content>", file=file)
-            print(f"Dear {fullname}\nHere's yer schedule:\n{items}", file=file)
+            print(f"Dear {fullname}\n\nHere's yer schedule:\n{items}", file=file)
             print(f"</content>", file=file)
             print(f"</email>\n\n", file=file)
 
