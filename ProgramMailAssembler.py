@@ -9,7 +9,7 @@ from HelpersPackage import FindAnyBracketedText
 def main():
     # Open the schedule markup file
     markuplines=""
-    with open("Program participant schedules markup.txt", "r") as file:
+    with open("Program participant schedules.xml", "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
