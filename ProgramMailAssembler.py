@@ -2,28 +2,40 @@ from __future__ import annotations
 from typing import Optional
 
 from datetime import datetime
+import re
 
-from HelpersPackage import FindAnyBracketedText
+from HelpersPackage import FindAnyBracketedText, MessageLog
+from Log import Log
 
+
+#******************************************************************************************************************************************************
+#
+#       ProgramMailAssembler
+#
+# PMA takes a pair of XML files created by ProgramAnalyzer and a template file created by the user and creates an XML file for input to ProgramMailer.
+# This output file contains the emails to be sent in a very simple structure.  The user can edit this file before submitting it to PM to be mailed.
+#
+#******************************************************************************************************************************************************
 
 def main():
     # Open the schedule markup file
-    markuplines=""
-    with open("Program participant schedules.xml", "r") as file:
+    with open("../ProgramAnalyzer/reports/Program participant schedules markup.txt", "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
 
+    if not CheckBalance(markuplines):
+        return
+
     # <person>xxxx</person>
-    # <person>xxxx</person>
+    # ...
     # <person>xxxx</person>
 
     # Each xxxx is:
     # <fullname>fffff</fullname>
     # <email>eeeee</email>
     # <item>iiii</item>
-    # <item>iiii</item>
-    # <item>iiii</item>
+    # ...
     # <item>iiii</item>
 
     # Each iiii is:
@@ -32,45 +44,125 @@ def main():
     # <precis>yyyyy</precis>
 
     # Markup is a dict keyed by the <name></name> with contents the contained markup and rooted at "main"
-    main=Node("Main", markuplines).Resolve()
+    main=Node("Main", markuplines)
+    main.Resolve()
 
-    # Now we have the whole schmeer in a hierarchical structure
-    # Generate the output
+    # Now read the People table
+    # Format: <person>pppp</person> (repeated)
+    # pppp: <header>value</header> repeated for each column
+
+    with open("../ProgramAnalyzer/reports/Program participants.xml", "r") as file:
+        peoplefile=file.read()
+    peoplelines: list[str]=[]
+    while len(peoplefile) > 0:
+        _, tag, line, peoplefile=FindAnyBracketedText(peoplefile)
+        peoplelines.append(line)
+
+    # A dictionary of people
+    # Each person's value is a dictionary of column values
+    people: dict[str, dict[str, str]]={}
+    for line in peoplelines:
+        d={}
+        while len(line) > 0:
+            _, header, value, line=FindAnyBracketedText(line)
+            #Log(f"{header=}  {value=}")
+            d[header.lower()]=value
+        if d["fname"]:
+            people[d["fname"]+" "+d["lname"]]=d
+
+    # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
+    # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
+    # with the person's schedule.
+    with open("Template.xml", "r") as file:
+        template=file.read()
+
+    if not CheckBalance(template):
+        return
+
+    # Read the selection criterion
+    _, tag, selection, template=FindAnyBracketedText(template)
+    if tag != "select":
+        MessageLog(f"First item in template is not the selection: {tag=}  and {selection=}")
+        return
+    _, tag, header, selection=FindAnyBracketedText(selection)
+    if tag != "header":
+        MessageLog(f"First item in select specification is not the header: {tag=}  and {selection=}")
+        return
+    _, tag, selectionvalue, selection=FindAnyBracketedText(selection)
+    if tag != "value":
+        MessageLog(f"Second item in select specification is not the selection value: {tag=}  and {selection=}")
+        return
+
+    # Read the email body
+    _, tag, emailbody, template=FindAnyBracketedText(template)
+    if tag != "email body":
+        MessageLog(f"Second item in template is not the email body: {tag=}  and {emailbody=}")
+        return
+
+    # OK, time to produce the output
+    # We loop through all the people who have schedules, and generate emails for those who match the selection criterion.
+    # The email file is also XMLish:
+    # <person>
+    # <email>email address</email>
+    # <contents>letter...<contents>
+    # </person>  ...and repeated
+
     with open("Program participant schedules email.txt", "w") as file:
         print(f"# {datetime.now()}\n", file=file)
         for person in main:
-            fullname=""
-            emailAddr=""
-            items=""
-            for attribute in person.List:
-                if attribute.Key == "email":
-                    emailAddr=attribute.Text
-                    continue
-                if attribute.Key == "fullname":
-                    fullname=attribute.Text
-                    continue
-                if attribute.Key == "item":
-                    title=""
-                    participants=""
-                    precis=""
-                    for subatt in attribute.List:
-                        if subatt.Key == "title":
-                            title=subatt.Text
-                        if subatt.Key == "participants":
-                            participants=subatt.Text
-                        if subatt.Key == "precis":
-                            precis=subatt.Text
-                    item=f"{title}\n{participants}\n"
-                    if len(precis) > 0:
-                        item+=f"{precis}\n"
-                    items=items+item+"\n"
-                    continue
-            print(f"<email>", file=file)
-            print(f"<email-address>{emailAddr}</email-address>", file=file)
-            print(f"<content>", file=file)
-            print(f"Dear {fullname}\n\nHere's yer schedule:\n{items}", file=file)
-            print(f"</content>", file=file)
-            print(f"</email>\n\n", file=file)
+            if person["fullname"] not in people.keys():
+                Log(f"{person['fullname']=} not in People")
+                continue
+
+            file.write(f"<person>")
+            emailAddr=person["email"]
+            file.write(f"<email-address>{emailAddr}</email-address>")
+            file.write(f"<content>")
+
+            # Now substitute into the email body from the template and write it
+            # We scan for all [[xxx]] and replace it with people[person][xxx]
+            thismail=emailbody
+            while thismail.find("[[") >= 0:
+                loc1=thismail.find("[[")
+                loc2=thismail[loc1:].find("]]")
+                if loc1 >= 0 and loc2 >= 0:
+                    start=thismail[:loc1]
+                    tag=thismail[loc1+2:loc1+loc2].lower()
+                    trail=thismail[loc1+loc2+2:]
+                    # Substitute content for the tag
+                    if tag == "schedule":
+                        items=""
+                        for attribute in person.List:
+                            if attribute.Key == "fullname":
+                                fullname=attribute.Text
+                                continue
+                            if attribute.Key == "item":
+                                title=""
+                                participants=""
+                                precis=""
+                                for subatt in attribute.List:
+                                    if subatt.Key == "title":
+                                        title=subatt.Text
+                                    if subatt.Key == "participants":
+                                        participants=subatt.Text
+                                    if subatt.Key == "precis":
+                                        precis=subatt.Text
+                                item=f"{title}\n{participants}\n"
+                                if len(precis) > 0:
+                                    item+=f"{precis}\n"
+                                items=items+item+"\n"
+                                continue
+                        thismail=start+items+trail
+                    else:   # All other tags come from the people tab
+                        if tag not in next(iter(people.values())):  # Kludge to get the keys of the inner dictionary
+                            Log(f"Can't find {tag=} in people.keys()", isError=True)
+                            break
+                        thismail=start+people[person['fullname']][tag]+trail
+
+            file.write(thismail+"\n")
+
+            file.write(f"</content>")
+            file.write(f"</person>\n\n\n")
 
 
 
@@ -92,8 +184,16 @@ class Node():
         assert type(self._value) != Node
         return len(self._value)
 
-    def __getitem__(self, i: int):
-        return self._value[i]
+    def __getitem__(self, index):
+        if type(index) is int:
+            return self._value[index]
+        if type(index) is str:
+            for node in self.List:
+                if node.Key == index.lower():
+                    return node.Text
+        assert False
+
+
 
     @property
     def IsText(self) -> bool:
@@ -128,18 +228,108 @@ class Node():
             lead, bracket, contents, trail=FindAnyBracketedText(text)
             if bracket == "" and contents == "":
                 if trail != "":
-                    print(f"[({key}, {trail})]")
+                    #print(f"[({key}, {trail})]")
                     self._value=trail
                     return self
                 if trail == "":
                     break
-            out.append(Node(bracket, contents).Resolve())
+            node=Node(bracket, contents)
+            node.Resolve()
+            out.append(node)
             text=trail
 
-        print(f"[({key}, {len(out)=})]")
-        self._value=out
+        #print(f"[({key}, {len(out)=})]")
+        if out:
+            self._value=out
         return self
 
+#-------------------------------------------
+# Check a string to make sure that it has balanced and properly nested <xxx></xxx> and [[]]s
+# Log errors
+def CheckBalance(s: str) -> bool:
+    Log(f"\nCheckBalance:  {s=}")
 
+    nesting: list[str]=[]
+
+    # Remove the line ends as they just make Regex harder.
+    s=s.replace("\n", " ")
+
+    while s:
+        delim, s=LocateNextDelimiter(s)
+        #Log(f"CheckBalance:  {delim=}    {s=}")
+        if (delim is None or delim == "") and nesting:
+            MessageLog(f"Template error: Unbalanced delimiters found around '{s}")
+            return False
+
+        if delim == "":
+            return True
+
+        # Is this a new opening delimiter?
+        if delim == "[[" or delim[0] != "/":
+            nesting.append(delim)
+            #Log(f"CheckBalance: push '{delim}'   {s=}")
+            continue
+
+        # We have a delimiter and it is not an opening delim, so it much be a closing delim.  Is there anything left on the stack to match?
+        if not nesting:
+            MessageLog(f"CheckBalance: missing ]] near '{s}")
+            return False
+
+        top=nesting.pop()
+        #Log(f"CheckBalance: pop '{top}'   {s=}")
+
+        if delim == "]]":
+            if top != "[[":
+                MessageLog(f"CheckBalance: Unbalanced [[]] near '{s}")
+                return False
+            continue
+
+        if delim[0] == "/":
+            if top == delim[1:]:
+                continue
+            MessageLog(f"CheckBalance: Unbalanced <>...</> near '{s}")
+            return False
+
+    return True
+
+# Scan for the next opening or closing delimiter.
+# Return a tuple of the delimiter found and the remaining text
+# For <xxx>, the delimiter returned is xxx. For [[xxx]], the delimiter returned is [[
+# Return (None, str) on error
+def LocateNextDelimiter(s: str) -> tuple[Optional[str], str]:
+    if not s:
+        return "", ""
+
+    # Match <stuff> followed by "<" followed by stuff not containing delimiters, followed by ">", followed by stuff
+    m1=re.match("^[^<]*?<([^<>\[\]]*?)>", s)
+    m2=re.match("^[^\[]*?\[\[([^<>\[\]]]*?)]", s)
+
+    # Neither found means we're done.
+    if m1 is None and m2 is None:
+        #Log(f"LocateNextDelimiter: m1=m2=None")
+        return "", ""
+
+    if m1 is not None and m2 is None:
+        i=0
+        #Log(f"LocateNextDelimiter: m1 ends at {m1.regs[0][1]}")
+        return m1.groups()[0], s[m1.regs[0][1]:]
+
+    if m1 is None and m2 is not None:
+        i=0
+        #Log(f"LocateNextDelimiter: m2 ends at {m2.regs[0][1]}")
+        return "[[", s[m2.regs[0][1]:]
+
+    # Both found. Which is first?
+    #Log(f"LocateNextDelimiter: m1 ends at {m1.regs[0][1]} and m2 ends at {m2.regs[0][1]}")
+    if m1.regs[0][1] < m2.regs[0][1]:
+        return m1.groups()[0], s[m1.regs[0][1]:]
+    else:
+        return "[[", s[m2.regs[0][1]:]
+
+
+
+######################################
+# Run main()
+#
 if __name__ == "__main__":
     main()
