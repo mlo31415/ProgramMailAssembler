@@ -19,7 +19,7 @@ from Log import Log
 
 def main():
     # Open the schedule markup file
-    with open("../ProgramAnalyzer/reports/Program participant schedules markup.txt", "r") as file:
+    with open("../ProgramAnalyzer/reports/Program participant schedules.xml", "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
