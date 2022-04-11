@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime
 import re
 
-from HelpersPackage import FindAnyBracketedText, MessageLog
+from HelpersPackage import FindAnyBracketedText, MessageLog, SelectFileBasedOnDebugger
 from Log import Log
 
 
@@ -19,7 +19,7 @@ from Log import Log
 
 def main():
     # Open the schedule markup file
-    with open("../ProgramAnalyzer/reports/Program participant schedules.xml", "r") as file:
+    with open(SelectFileBasedOnDebugger("../ProgramAnalyzer/reports", "Program participant schedules.xml"), "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
@@ -51,7 +51,7 @@ def main():
     # Format: <person>pppp</person> (repeated)
     # pppp: <header>value</header> repeated for each column
 
-    with open("../ProgramAnalyzer/reports/Program participants.xml", "r") as file:
+    with open(SelectFileBasedOnDebugger("../ProgramAnalyzer/reports", "Program participants.xml"), "r") as file:
         peoplefile=file.read()
     peoplelines: list[str]=[]
     while len(peoplefile) > 0:
