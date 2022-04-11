@@ -110,11 +110,11 @@ def main():
     with open("Program participant schedules email.txt", "w") as file:
         print(f"# {datetime.now()}\n", file=file)
         for person in main:
-            if person["fullname"] not in people.keys():
-                Log(f"{person['fullname']=} not in People")
+            if person["full name"] not in people.keys():
+                Log(f"{person['full name']=} not in People")
                 continue
 
-            file.write(f"<person>")
+            file.write(f"<email-message>")
             emailAddr=person["email"]
             file.write(f"<email-address>{emailAddr}</email-address>")
             file.write(f"<content>")
@@ -133,7 +133,7 @@ def main():
                     if tag == "schedule":
                         items=""
                         for attribute in person.List:
-                            if attribute.Key == "fullname":
+                            if attribute.Key == "full name":
                                 fullname=attribute.Text
                                 continue
                             if attribute.Key == "item":
@@ -157,12 +157,12 @@ def main():
                         if tag not in next(iter(people.values())):  # Kludge to get the keys of the inner dictionary
                             Log(f"Can't find {tag=} in people.keys()", isError=True)
                             break
-                        thismail=start+people[person['fullname']][tag]+trail
+                        thismail=start+people[person['full name']][tag]+trail
 
             file.write(thismail+"\n")
 
             file.write(f"</content>")
-            file.write(f"</person>\n\n\n")
+            file.write(f"</email-message>\n\n\n")
 
 
 
