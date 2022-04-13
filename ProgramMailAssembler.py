@@ -67,8 +67,8 @@ def main():
             _, header, value, line=FindAnyBracketedText(line)
             #Log(f"{header=}  {value=}")
             d[header.lower()]=value
-        if d["fname"]:
-            people[d["fname"]+" "+d["lname"]]=d
+        if d["full name"]:
+            people[d["full name"]]=d
 
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
