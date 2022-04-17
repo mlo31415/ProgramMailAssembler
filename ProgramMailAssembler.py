@@ -3,8 +3,9 @@ from typing import Optional
 
 from datetime import datetime
 import re
+import os
 
-from HelpersPackage import FindAnyBracketedText, MessageLog, SelectFileBasedOnDebugger
+from HelpersPackage import FindAnyBracketedText, MessageLog, SelectFileBasedOnDebugger, ReadListAsParmDict, ParmDict
 from Log import Log
 
 
@@ -18,8 +19,17 @@ from Log import Log
 #******************************************************************************************************************************************************
 
 def main():
+
+    parameters=ReadListAsParmDict('parameters.txt')
+    if parameters is None or len(parameters) == 0:
+        MessageLog(f"Can't open/read {os.getcwd()}/parameters.txt")
+        exit(999)
+
     # Open the schedule markup file
-    with open(SelectFileBasedOnDebugger("../ProgramAnalyzer/reports", "Program participant schedules.xml"), "r") as file:
+    schedPath=OpenProgramFile("Program participant schedules.xml", parameters["ProgramAnalyzerReportsdir"], ".")
+    if not schedPath:
+        exit(999)
+    with open(schedPath, "r") as file:
         markuplines=file.read()
     # Remove newlines *outside* markup
     markuplines=markuplines.replace(">\n<", "><")
@@ -51,7 +61,10 @@ def main():
     # Format: <person>pppp</person> (repeated)
     # pppp: <header>value</header> repeated for each column
 
-    with open(SelectFileBasedOnDebugger("../ProgramAnalyzer/reports", "Program participants.xml"), "r") as file:
+    ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
+    if not ppPath:
+        exit(999)
+    with open(ppPath, "r") as file:
         peoplefile=file.read()
     peoplelines: list[str]=[]
     while len(peoplefile) > 0:
@@ -73,6 +86,9 @@ def main():
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
     # with the person's schedule.
+    templatePath=OpenProgramFile(parameters["PMATemplateFile"], ".", ".")
+    if templatePath is None:
+        exit(999)
     with open("Template.xml", "r") as file:
         template=file.read()
 
@@ -258,7 +274,7 @@ def CheckBalance(s: str) -> bool:
         delim, s=LocateNextDelimiter(s)
         #Log(f"CheckBalance:  {delim=}    {s=}")
         if (delim is None or delim == "") and nesting:
-            MessageLog(f"Template error: Unbalanced delimiters found around '{s}")
+            MessageLog(f"Template error: Unbalanced delimiters found around '{s}\nProgramMailAssembler terminated.")
             return False
 
         if delim == "":
@@ -272,7 +288,7 @@ def CheckBalance(s: str) -> bool:
 
         # We have a delimiter and it is not an opening delim, so it much be a closing delim.  Is there anything left on the stack to match?
         if not nesting:
-            MessageLog(f"CheckBalance: missing ]] near '{s}")
+            MessageLog(f"CheckBalance: Error -- missing ]] near '{s}\nProgramMailAssembler terminated.")
             return False
 
         top=nesting.pop()
@@ -280,14 +296,14 @@ def CheckBalance(s: str) -> bool:
 
         if delim == "]]":
             if top != "[[":
-                MessageLog(f"CheckBalance: Unbalanced [[]] near '{s}")
+                MessageLog(f"CheckBalance: Error -- Unbalanced [[]] near '{s}\nProgramMailAssembler terminated.")
                 return False
             continue
 
         if delim[0] == "/":
             if top == delim[1:]:
                 continue
-            MessageLog(f"CheckBalance: Unbalanced <>...</> near '{s}")
+            MessageLog(f"CheckBalance: Error -- Unbalanced <>...</> near '{s}\nProgramMailAssembler terminated.")
             return False
 
     return True
@@ -326,7 +342,34 @@ def LocateNextDelimiter(s: str) -> tuple[Optional[str], str]:
     else:
         return "[[", s[m2.regs[0][1]:]
 
+# Search for a Program file and return its path.
+# Look first in the location specified by path.  Failing that, look in defaultDir.  Failing that look in the CWD.
+def OpenProgramFile(fname: str, path: str, defaultDir: str, report=True) -> Optional[str]:
+    if fname is None:
+        MessageLog(f"OpenProgramFile: fname is None, {path=}")
+        return None
 
+    if path is not None:
+        pathname=os.path.join(path, fname)
+        if os.path.exists(pathname):
+            return pathname
+
+    pathname=os.path.join(defaultDir, fname)
+    if os.path.exists(pathname):
+        return pathname
+
+    if os.path.exists(fname):
+        return fname
+
+    if report:
+        if defaultDir != "." and path != ".":
+            MessageLog(f"Can't find '{fname}': checked '{path}', '{defaultDir}' and './'")
+        elif path != ".":
+            MessageLog(f"Can't find '{fname}': checked '{path}' and './'")
+        else:
+            MessageLog(f"Can't find '{fname}': checked './'")
+
+    return None
 
 ######################################
 # Run main()
