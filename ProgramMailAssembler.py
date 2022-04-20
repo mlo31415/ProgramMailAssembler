@@ -96,15 +96,18 @@ def main():
         return
 
     # Read the selection criterion
+    # Note that the selection's header value may be empty, but it must be present, as must a (possibly empty) value
     _, tag, selection, template=FindAnyBracketedText(template)
     if tag != "select":
         MessageLog(f"First item in template is not the selection: {tag=}  and {selection=}")
         return
     _, tag, header, selection=FindAnyBracketedText(selection)
+    header=header.strip().lower()
     if tag != "header":
         MessageLog(f"First item in select specification is not the header: {tag=}  and {selection=}")
         return
     _, tag, selectionvalue, selection=FindAnyBracketedText(selection)
+    selectionvalue=selectionvalue.strip()
     if tag != "value":
         MessageLog(f"Second item in select specification is not the selection value: {tag=}  and {selection=}")
         return
@@ -126,8 +129,18 @@ def main():
     with open("Program participant schedules email.txt", "w") as file:
         print(f"# {datetime.now()}\n", file=file)
         for person in main:
-            if person["full name"] not in people.keys():
-                Log(f"{person['full name']=} not in People")
+            fullname=person["full name"]
+            if fullname not in people.keys():
+                Log(f"For {fullname}, {person['full name']=} not in People -- skipped.")
+                continue
+
+            peopledata=people[fullname]
+            if header not in peopledata.keys():
+                Log(f"For {fullname}, {header=} not in People's column headers -- skipped.")
+                continue
+            headervalue=peopledata[header]
+            if headervalue.strip() != selectionvalue:
+                Log(f"For {fullname}, {headervalue=} does not match {selectionvalue=} -- skipped.")
                 continue
 
             file.write(f"<email-message>")
