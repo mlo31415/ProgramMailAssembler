@@ -20,7 +20,7 @@ from Log import Log
 
 def main():
 
-    parameters=ReadListAsParmDict('parameters.txt')
+    parameters=ReadListAsParmDict('parameters.txt', isFatal=True)
     if parameters is None or len(parameters) == 0:
         MessageLog(f"Can't open/read {os.getcwd()}/parameters.txt")
         exit(999)
