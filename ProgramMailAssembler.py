@@ -73,9 +73,9 @@ def main():
 
     # A dictionary of people
     # Each person's value is a dictionary of column values
-    people: dict[str, dict[str, str]]={}
+    people=ParmDict(CaseInsensitiveCompare=True, IgnoreSpacesCompare=True)
     for line in peoplelines:
-        d={}
+        d=ParmDict(CaseInsensitiveCompare=True, IgnoreSpacesCompare=True)
         while len(line) > 0:
             _, header, value, line=FindAnyBracketedText(line)
             #Log(f"{header=}  {value=}")
