@@ -80,7 +80,7 @@ def main():
             _, header, value, line=FindAnyBracketedText(line)
             #Log(f"{header=}  {value=}")
             d[header.lower()]=value
-        if d["full name"]:
+        if d.Exists("full name"):
             people[d["full name"]]=d
 
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
@@ -130,13 +130,13 @@ def main():
         print(f"# {datetime.now()}\n", file=file)
         for person in main:
             fullname=person["full name"]
-            if fullname not in people.keys():
-                Log(f"For {fullname}, {person['full name']=} not in People -- skipped.")
+            if not people.Exists(fullname):
+                LogError(f"For {fullname}, {person['full name']=} not in People -- skipped.")
                 continue
 
             peopledata=people[fullname]
-            if header not in peopledata.keys():
-                Log(f"For {fullname}, {header=} not in People's column headers -- skipped.")
+            if not peopledata.Exists(header):
+                LogError(f"For {fullname}, {header=} not in People's column headers -- skipped.")
                 continue
             headervalue=peopledata[header]
             if headervalue.strip() != selectionvalue:
