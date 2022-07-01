@@ -5,8 +5,8 @@ from datetime import datetime
 import re
 import os
 
-from HelpersPackage import FindAnyBracketedText, MessageLog, SelectFileBasedOnDebugger, ReadListAsParmDict, ParmDict
-from Log import Log
+from HelpersPackage import FindAnyBracketedText, MessageLog, ReadListAsParmDict, ParmDict
+from Log import Log, LogError, LogDisplayErrorsIfAny
 
 
 #******************************************************************************************************************************************************
@@ -192,6 +192,8 @@ def main():
 
             file.write(f"</content>")
             file.write(f"</email-message>\n\n\n")
+
+    LogDisplayErrorsIfAny()
 
 
 
