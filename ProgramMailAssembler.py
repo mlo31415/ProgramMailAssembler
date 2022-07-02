@@ -24,6 +24,10 @@ def main():
     if parameters is None or len(parameters) == 0:
         MessageLog(f"Can't open/read {os.getcwd()}/parameters.txt")
         exit(999)
+    mailFormat=parameters["MailFormat"].lower().strip()
+    if not mailFormat:
+        MessageLog(f"Can't find MailFormat value in parameters.txt\nProgramMailer terminated.")
+        exit(999)
 
     # Open the schedule markup file
     schedPath=OpenProgramFile("Program participant schedules.xml", parameters["ProgramAnalyzerReportsdir"], ".")
@@ -178,10 +182,19 @@ def main():
                                         participants=subatt.Text
                                     if subatt.Key == "precis":
                                         precis=subatt.Text
-                                item=f"{title}\n{participants}\n"
+                                if mailFormat == "html":
+                                    item=f"<p><b>{title}</p></b>\n<p>{participants}</p>\n"
+                                else:
+                                    item=f"{title}\n{participants}\n"
                                 if len(precis) > 0:
-                                    item+=f"{precis}\n"
-                                items=items+item+"\n"
+                                    if mailFormat == "html":
+                                        item+=f"{precis}\n"
+                                    else:
+                                        item+=f"<p>{precis}</p>\n"
+                                items=items+item
+                                if mailFormat == "html":
+                                    items=items+"<p>"
+                                items=items+"\n"
                                 continue
                         thismail=start+items+trail
                     else:   # All other tags come from the people tab
