@@ -278,7 +278,7 @@ class Node():
 # Check a string to make sure that it has balanced and properly nested <xxx></xxx> and [[]]s
 # Log errors
 def CheckBalance(s: str) -> bool:
-    Log(f"\nCheckBalance:  {s=}")
+    #Log(f"\nCheckBalance:  {s=}")
 
     nesting: list[str]=[]
 
