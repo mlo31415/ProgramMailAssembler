@@ -168,9 +168,7 @@ def main():
                     if tag == "schedule":
                         items=""
                         for attribute in person.List:
-                            if attribute.Key == "full name":
-                                fullname=attribute.Text
-                                continue
+
                             if attribute.Key == "item":
                                 title=""
                                 participants=""
