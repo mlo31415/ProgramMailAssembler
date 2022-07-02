@@ -197,7 +197,7 @@ def main():
                         thismail=start+items+trail
                     else:   # All other tags come from the people tab
                         if tag not in next(iter(people.values())):  # Kludge to get the keys of the inner dictionary
-                            Log(f"Can't find {tag=} in people.keys()", isError=True)
+                            LogError(f"Can't find {tag=} in people.keys()")
                             break
                         thismail=start+people[person['full name']][tag]+trail
 
