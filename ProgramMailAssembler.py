@@ -58,8 +58,8 @@ def main():
     main.Resolve()
 
     # Now read the People table
-    # Format: <person>pppp</person> (repeated)
-    # pppp: <header>value</header> repeated for each column
+    # Format: <person>pppp</person> (repeated, one line per person)
+    # pppp: <header>value</header>  (repeated, one for each column in the people tab)
 
     ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
     if not ppPath:
@@ -71,8 +71,8 @@ def main():
         _, tag, line, peoplefile=FindAnyBracketedText(peoplefile)
         peoplelines.append(line)
 
-    # A dictionary of people
-    # Each person's value is a dictionary of column values
+    # A dictionary of people, keyed by the person's full name
+    # Each person's value is a dictionary of column values from the people tab
     people=ParmDict(CaseInsensitiveCompare=True, IgnoreSpacesCompare=True)
     for line in peoplelines:
         d=ParmDict(CaseInsensitiveCompare=True, IgnoreSpacesCompare=True)
@@ -82,6 +82,8 @@ def main():
             d[header.lower()]=value
         if d.Exists("full name"):
             people[d["full name"]]=d
+        else:
+            LogError(f"While reading 'Program participants.xml', unable to find a Full Name for \n{line}\n\n")
 
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
