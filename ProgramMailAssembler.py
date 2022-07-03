@@ -26,7 +26,7 @@ def main():
         exit(999)
     mailFormat=parameters["MailFormat"].lower().strip()
     if not mailFormat:
-        MessageLog(f"Can't find MailFormat value in parameters.txt\nProgramMailAssembler terminated.")
+        MessageLog(f"Can't find MailFormat value ('plain' or 'html') in parameters.txt\nProgramMailAssembler terminated.")
         exit(999)
 
     # Open the schedule markup file
