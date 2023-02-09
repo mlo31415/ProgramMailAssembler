@@ -5,7 +5,7 @@ from datetime import datetime
 import re
 import os
 
-from HelpersPackage import FindAnyBracketedText, MessageLog, ReadListAsParmDict, ParmDict
+from HelpersPackage import FindAnyBracketedText, FindBracketedText, MessageLog, ReadListAsParmDict, ParmDict
 from Log import Log, LogError, LogDisplayErrorsIfAny
 
 
@@ -110,25 +110,25 @@ def main():
 
     # Read the selection criterion
     # Note that the selection's header value may be empty, but it must be present, as must a (possibly empty) value
-    _, tag, selection, template=FindAnyBracketedText(template)
-    if tag != "select":
-        MessageLog(f"First item in template is not the selection: {tag=}  and {selection=}")
+    selection, template=FindBracketedText(template, "select", stripHtml=False)
+    if len(selection) == 0:
+        MessageLog(f"Template does not contain a <selection>...</selection> element")
         return
-    _, tag, header, selection=FindAnyBracketedText(selection)
+    header, selection=FindBracketedText(selection, "header", stripHtml=False)
     header=header.strip().lower()
-    if tag != "header":
-        MessageLog(f"First item in select specification is not the header: {tag=}  and {selection=}")
+    if len(header) == 0:
+        MessageLog(f"<select> element does not contain a <header>...</header> element>")
         return
-    _, tag, selectionvalue, selection=FindAnyBracketedText(selection)
+    selectionvalue, selection=FindBracketedText(selection, "value", stripHtml=False)
     selectionvalue=selectionvalue.strip()
-    if tag != "value":
-        MessageLog(f"Second item in select specification is not the selection value: {tag=}  and {selection=}")
+    if len(selectionvalue) == 0:
+        MessageLog(f"<selection> element does not contain a <value>...</value> element>")
         return
 
     # Read the email body
-    _, tag, emailbody, template=FindAnyBracketedText(template)
-    if tag != "email body":
-        MessageLog(f"Second item in template is not the email body: {tag=}  and {emailbody=}")
+    emailbody, template=FindBracketedText(template, "email body", stripHtml=False)
+    if len(emailbody) == 0:
+        MessageLog(f"Template does not contain an <email body>...</email body> element>")
         return
 
     # OK, time to produce the output
