@@ -89,10 +89,12 @@ def main():
             _, header, value, line=FindAnyBracketedText(line)
             #Log(f"{header=}  {value=}")
             d[header.lower()]=value
-        if d.Exists("full name"):
-            people[d["full name"]]=d
-        else:
-            LogError(f"While reading 'Program participants.xml', unable to find a Full Name for \n{line}\n\n")
+        if len(d) > 0:
+            if d.Exists("full name"):
+                people[d["full name"]]=d
+            else:
+                LogError(f"While reading 'Program participants.xml', unable to find a Full Name for \n{line}\n")
+                LogError(f"ParmDict={[x for x in d]}\n\n")
 
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
