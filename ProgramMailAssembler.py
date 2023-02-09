@@ -87,8 +87,8 @@ def main():
         d=ParmDict(CaseInsensitiveCompare=True, IgnoreSpacesCompare=True)
         while len(line) > 0:
             _, header, value, line=FindAnyBracketedText(line)
-            #Log(f"{header=}  {value=}")
-            d[header.lower()]=value
+            Log(f"{header=}  {value=}")
+            d[header]=value
         if len(d) > 0:
             if d.Exists("full name"):
                 people[d["full name"]]=d
