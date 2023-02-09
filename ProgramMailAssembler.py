@@ -310,6 +310,9 @@ def CheckBalance(s: str) -> bool:
 
         # Is this a new opening delimiter?
         if delim == "[[" or delim[0] != "/":
+            m=re.match("^([a-zA-Z0-9])\s", delim)   # Check for cases like <a http=...> -- the delim is just the a
+            if m is not None:
+                delim=m.groups()[0]
             nesting.append(delim)
             #Log(f"CheckBalance: push '{delim}'   {s=}")
             continue
