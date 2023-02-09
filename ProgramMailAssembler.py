@@ -31,7 +31,9 @@ def main():
 
     # Open the schedule markup file
     schedPath=OpenProgramFile("Program participant schedules.xml", parameters["ProgramAnalyzerReportsdir"], ".")
+    Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {schedPath}')
     if not schedPath:
+        Log(f'OpenProgramFile failed')
         exit(999)
     with open(schedPath, "r") as file:
         markuplines=file.read()
@@ -39,6 +41,7 @@ def main():
     markuplines=markuplines.replace(">\n<", "><")
 
     if not CheckBalance(markuplines):
+        Log(f'CheckBalance failed')
         return
 
     # <person>xxxx</person>
@@ -66,7 +69,9 @@ def main():
     # pppp: <header>value</header>  (repeated, one for each column in the people tab)
 
     ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
+    Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {ppPath}')
     if not ppPath:
+        Log(f'OpenProgramFile failed')
         exit(999)
     with open(ppPath, "r") as file:
         peoplefile=file.read()
