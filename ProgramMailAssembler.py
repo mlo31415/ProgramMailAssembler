@@ -5,7 +5,7 @@ from datetime import datetime
 import re
 import os
 
-from HelpersPackage import FindAnyBracketedText, FindBracketedText, MessageLog, ReadListAsParmDict, ParmDict
+from HelpersPackage import FindBracketedText, MessageLog, ReadListAsParmDict, ParmDict
 from Log import Log, LogError, LogDisplayErrorsIfAny
 
 
@@ -408,6 +408,27 @@ def OpenProgramFile(fname: str, path: str, defaultDir: str, report=True) -> Opti
             MessageLog(f"Can't find '{fname}': checked './'")
 
     return None
+
+#=====================================================================================
+# Note this is a carient of a method from HelpersFile
+# Find first text bracketed by <anything>...</anything>
+# Return a tuple consisting of:
+#   Any leading material
+#   The name of the first pair of brackets found
+#   The contents of the first pair of brackets found
+#   The remainder of the input string
+# Note that this is a *non-greedy* scanner
+# Note also that it is not very tolerant of errors in the bracketing, just dropping things on the floor
+def FindAnyBracketedText(s: str) -> tuple[str, str, str, str]:
+
+    pattern=r"^(.*?)<([a-zA-Z0-9 ]+)[^>]*?>(.*?)<\/\2>"
+    m=re.search(pattern, s,  re.DOTALL)
+    if m is None:
+        return s, "", "", ""
+
+    x=m.group(1), m.group(2), m.group(3), s[m.regs[0][1]:]
+    return x
+
 
 ######################################
 # Run main()
