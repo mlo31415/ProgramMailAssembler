@@ -33,7 +33,7 @@ def main():
     schedPath=OpenProgramFile("Program participant schedules.xml", parameters["ProgramAnalyzerReportsdir"], ".")
     Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {schedPath}')
     if not schedPath:
-        Log(f'OpenProgramFile failed')
+        LogError(f'OpenProgramFile of {parameters["ProgramAnalyzerReportsdir"]} failed')
         exit(999)
     with open(schedPath, "r") as file:
         markuplines=file.read()
@@ -71,7 +71,7 @@ def main():
     ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
     Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {ppPath}')
     if not ppPath:
-        Log(f'OpenProgramFile failed')
+        LogError(f'OpenProgramFile of {parameters["ProgramAnalyzerReportsdir"]} failed')
         exit(999)
     with open(ppPath, "r") as file:
         peoplefile=file.read()
