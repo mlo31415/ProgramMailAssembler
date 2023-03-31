@@ -30,10 +30,10 @@ def main():
         exit(999)
 
     # Open the schedule markup file
-    schedPath=OpenProgramFile("Program participant schedules.xml", parameters["ProgramAnalyzerReportsdir"], ".")
-    Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {schedPath}')
+    schedPath=OpenProgramFile(f"Program participant schedules.xml", parameters['ProgramAnalyzerReportsdir'], ".")
+    Log(f'OpenProgramFile("Program participant schedules.xml", "{parameters["ProgramAnalyzerReportsdir"]}", ".") yielded {schedPath}')
     if not schedPath:
-        LogError(f'OpenProgramFile of {parameters["ProgramAnalyzerReportsdir"]} failed')
+        LogError(f'OpenProgramFile of {schedPath} failed')
         exit(999)
     with open(schedPath, "r") as file:
         markuplines=file.read()
@@ -69,9 +69,9 @@ def main():
     # pppp: <header>value</header>  (repeated, one for each column in the people tab)
 
     ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
-    Log(f'OpenProgramFile("Program participant schedules.xml", {parameters["ProgramAnalyzerReportsdir"]}, ".") yielded {ppPath}')
+    Log(f'OpenProgramFile("Program participant schedules.xml", "{parameters["ProgramAnalyzerReportsdir"]}", ".") yielded {ppPath}')
     if not ppPath:
-        LogError(f'OpenProgramFile of {parameters["ProgramAnalyzerReportsdir"]} failed')
+        LogError(f'OpenProgramFile of {ppPath} failed')
         exit(999)
     with open(ppPath, "r") as file:
         peoplefile=file.read()
