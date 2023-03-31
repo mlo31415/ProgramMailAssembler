@@ -100,6 +100,7 @@ def main():
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
     # with the person's schedule.
     templatePath=OpenProgramFile(parameters["PMATemplateFile"], ".", ".")
+    Log(f"Template is {templatePath}")
     if templatePath is None:
         MessageLog(f"Template file {templatePath} could not be opened")
         exit(999)
