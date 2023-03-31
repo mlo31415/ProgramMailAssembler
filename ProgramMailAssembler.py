@@ -71,7 +71,7 @@ def main():
     ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
     Log(f'OpenProgramFile("Program participant schedules.xml", "{parameters["ProgramAnalyzerReportsdir"]}", ".") yielded {ppPath}')
     if not ppPath:
-        LogError(f'OpenProgramFile of {ppPath} failed')
+        MessageLog(f'OpenProgramFile of {ppPath} failed')
         exit(999)
     with open(ppPath, "r") as file:
         peoplefile=file.read()
@@ -101,11 +101,13 @@ def main():
     # with the person's schedule.
     templatePath=OpenProgramFile(parameters["PMATemplateFile"], ".", ".")
     if templatePath is None:
+        MessageLog(f"Template file {templatePath} could not be opened")
         exit(999)
     with open(templatePath, "r", encoding="UTF-8") as file:
         template=file.read()
 
     if not CheckBalance(template):
+        MessageLog("The template failed the CheckBalance() test -- it seems to have unbalanced HTML")
         return
 
     # Read the selection criterion
