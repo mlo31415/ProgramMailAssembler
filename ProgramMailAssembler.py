@@ -180,6 +180,8 @@ def main():
                     tag=thismail[loc1+2:loc1+loc2].lower()
                     trail=thismail[loc1+loc2+2:]
                     # Substitute content for the tag
+                    # The tag [[schedule]] is special and fetched from a bunch of keys in the person's schedule structure
+                    # The others
                     if tag == "schedule":
                         items=""
                         for attribute in person.List:
@@ -210,11 +212,14 @@ def main():
                                 items=items+"\n"
                                 continue
                         thismail=start+items+trail
-                    else:   # All other tags come from the people tab
-                        if tag not in next(iter(people.values())):  # Kludge to get the keys of the inner dictionary
+
+                    # All other tags come from columns of the people tab
+                    else:
+                        val=people[fullname][tag]
+                        if val is None:
                             LogError(f"Can't find {tag=} in people.keys() for {fullname}")
                             break
-                        thismail=start+people[person['full name']][tag]+trail
+                        thismail=start+val+trail
 
             file.write(thismail+"\n")
 
