@@ -102,7 +102,7 @@ def main():
     templatePath=OpenProgramFile(parameters["PMATemplateFile"], ".", ".")
     if templatePath is None:
         exit(999)
-    with open(templatePath, "r") as file:
+    with open(templatePath, "r", encoding="UTF-8") as file:
         template=file.read()
 
     if not CheckBalance(template):
