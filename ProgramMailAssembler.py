@@ -5,7 +5,7 @@ from datetime import datetime
 import re
 import os
 
-from HelpersPackage import FindBracketedText, MessageLog, ReadListAsParmDict, ParmDict
+from HelpersPackage import FindBracketedText, MessageLog, ReadListAsParmDict, ParmDict, GetParmFromParmDict
 from Log import Log, LogError, LogDisplayErrorsIfAny
 
 
@@ -24,14 +24,12 @@ def main():
     if parameters is None or len(parameters) == 0:
         MessageLog(f"Can't open/read {os.getcwd()}/parameters.txt")
         exit(999)
-    mailFormat=parameters["MailFormat"].lower().strip()
-    if not mailFormat:
-        MessageLog(f"Can't find MailFormat value ('plain' or 'html') in parameters.txt\nProgramMailAssembler terminated.")
-        exit(999)
+    mailFormat=GetParmFromParmDict(parameters,"MailFormat").lower().strip()
 
     # Open the schedule markup file
-    schedPath=OpenProgramFile(f"Program participant schedules.xml", parameters['ProgramAnalyzerReportsdir'], ".")
-    Log(f'OpenProgramFile("Program participant schedules.xml", "{parameters["ProgramAnalyzerReportsdir"]}", ".") yielded {schedPath}')
+    reportsdir=GetParmFromParmDict(parameters,"ProgramAnalyzerReportsdir")
+    schedPath=OpenProgramFile(f"Program participant schedules.xml", reportsdir, ".")
+    Log(f'OpenProgramFile("Program participant schedules.xml", {reportsdir}, ".") yielded {schedPath}')   # Concatenated strings...
     if not schedPath:
         LogError(f'OpenProgramFile of {schedPath} failed')
         exit(999)
@@ -68,8 +66,9 @@ def main():
     # Format: <person>pppp</person> (repeated, one line per person)
     # pppp: <header>value</header>  (repeated, one for each column in the people tab)
 
-    ppPath=OpenProgramFile("Program participants.xml", parameters["ProgramAnalyzerReportsdir"], ".")
-    Log(f'OpenProgramFile("Program participant schedules.xml", "{parameters["ProgramAnalyzerReportsdir"]}", ".") yielded {ppPath}')
+
+    ppPath=OpenProgramFile("Program participants.xml", reportsdir, ".")
+    Log(f'OpenProgramFile("Program participant schedules.xml", "{reportsdir}", ".") yielded {ppPath}')
     if not ppPath:
         MessageLog(f'OpenProgramFile of {ppPath} failed')
         exit(999)
