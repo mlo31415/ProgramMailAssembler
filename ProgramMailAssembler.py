@@ -159,7 +159,7 @@ def main():
                 LogError(f"For {fullname}, {header=} not in People's column headers -- skipped.")
                 continue
             headervalue=peopledata[header]
-            if headervalue.strip() != selectionvalue:
+            if headervalue.strip().lower() != selectionvalue.lower():
                 Log(f"For {fullname}, {headervalue=} does not match {selectionvalue=} -- skipped.")
                 continue
 
