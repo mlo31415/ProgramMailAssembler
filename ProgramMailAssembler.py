@@ -28,7 +28,7 @@ def main():
 
     # Open the schedule markup file
     reportsdir=GetParmFromParmDict(parameters,"ProgramAnalyzerReportsdir")
-    schedPath=OpenProgramFile(f"Program participant schedules.xml", reportsdir, ".")
+    schedPath=OpenProgramFile(f"Program participant schedules.xml", reportsdir)
     Log(f'OpenProgramFile("Program participant schedules.xml", {reportsdir}, ".") yielded {schedPath}')   # Concatenated strings...
     if not schedPath:
         LogError(f'OpenProgramFile of {schedPath} failed')
@@ -67,7 +67,7 @@ def main():
     # pppp: <header>value</header>  (repeated, one for each column in the people tab)
 
 
-    ppPath=OpenProgramFile("Program participants.xml", reportsdir, ".")
+    ppPath=OpenProgramFile("Program participants.xml", reportsdir)
     Log(f'OpenProgramFile("Program participant schedules.xml", "{reportsdir}", ".") yielded {ppPath}')
     if not ppPath:
         MessageLog(f'OpenProgramFile of {ppPath} failed')
