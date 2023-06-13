@@ -380,12 +380,10 @@ def LocateNextDelimiter(s: str) -> tuple[Optional[str], str]:
         return "", ""
 
     if m1 is not None and m2 is None:
-        i=0
         #Log(f"LocateNextDelimiter: m1 ends at {m1.regs[0][1]}")
         return m1.groups()[0], s[m1.regs[0][1]:]
 
     if m1 is None and m2 is not None:
-        i=0
         #Log(f"LocateNextDelimiter: m2 ends at {m2.regs[0][1]}")
         return "[[", s[m2.regs[0][1]:]
 
