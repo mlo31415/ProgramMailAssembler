@@ -234,7 +234,7 @@ def main():
 
 
 
-class Node():
+class Node:
     def __init__(self, key: str, value: str|list[Node] = ""):
         self._key=key
 
