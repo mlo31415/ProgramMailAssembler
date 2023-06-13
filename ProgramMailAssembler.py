@@ -190,12 +190,13 @@ def main():
                                 participants=""
                                 precis=""
                                 for subatt in attribute.List:
-                                    if subatt.Key == "title":
-                                        title=subatt.Text
-                                    if subatt.Key == "participants":
-                                        participants=subatt.Text
-                                    if subatt.Key == "precis":
-                                        precis=subatt.Text
+                                    match subatt.Key:
+                                        case "title":
+                                            title=subatt.Text
+                                        case "participants":
+                                            participants=subatt.Text
+                                        case "precis":
+                                            precis=subatt.Text
                                 if mailFormat == "html":
                                     item=f"<p><b>{title}</b></p>\n<p>{participants}</p>\n"
                                 else:
