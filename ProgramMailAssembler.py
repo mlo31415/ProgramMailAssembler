@@ -287,7 +287,6 @@ class Node:
         # Replace the list of strings with a list of dicts for each xxx and then call resolve for each of those
         # Find the first (perhaps only) markup in the list of strings
 
-        key=self._key
         text=self._value
 
         out: list[Node]=[]
