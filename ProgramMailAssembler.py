@@ -98,7 +98,7 @@ def main():
     # Read the email template.  It consists of two XMLish items, the selection criterion and the email body
     # Things in [[double brackets]] will be replaced by the corresponding cell from the person's row People page or, in the case of [[schedule]],
     # with the person's schedule.
-    templatePath=OpenProgramFile(parameters["PMATemplateFile"], ".", ".")
+    templatePath=OpenProgramFile(GetParmFromParmDict(parameters, "PMATemplateFile", "."), '.')
     Log(f"Template is {templatePath}")
     if templatePath is None:
         MessageLog(f"Template file {templatePath} could not be opened")
@@ -394,9 +394,10 @@ def LocateNextDelimiter(s: str) -> tuple[Optional[str], str]:
     else:
         return "[[", s[m2.regs[0][1]:]
 
+#-------------------------------------------------
 # Search for a Program file and return its path.
 # Look first in the location specified by path.  Failing that, look in defaultDir.  Failing that look in the CWD.
-def OpenProgramFile(fname: str, path: str, defaultDir: str, report=True) -> Optional[str]:
+def OpenProgramFile(fname: str, path: str, report=True) -> Optional[str]:
     if fname is None:
         MessageLog(f"OpenProgramFile: fname is None, {path=}")
         return None
@@ -406,7 +407,7 @@ def OpenProgramFile(fname: str, path: str, defaultDir: str, report=True) -> Opti
         if os.path.exists(pathname):
             return pathname
 
-    pathname=os.path.join(defaultDir, fname)
+    pathname=os.path.join(".", fname)
     if os.path.exists(pathname):
         return pathname
 
@@ -414,9 +415,7 @@ def OpenProgramFile(fname: str, path: str, defaultDir: str, report=True) -> Opti
         return fname
 
     if report:
-        if defaultDir != "." and path != ".":
-            MessageLog(f"Can't find '{fname}': checked '{path}', '{defaultDir}' and './'")
-        elif path != ".":
+        if path != ".":
             MessageLog(f"Can't find '{fname}': checked '{path}' and './'")
         else:
             MessageLog(f"Can't find '{fname}': checked './'")
