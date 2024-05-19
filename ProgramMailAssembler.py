@@ -215,10 +215,16 @@ def main():
 
                     # All other tags come from columns of the people tab
                     else:
+                        # If the tag is of the form xxx|yyy|xxx, we pass the prefix and suffix through if the center part is non-empty
+                        if tag.count("|") == 2:
+                            prefix, tag, suffix=tag.split("|")
+
                         val=people[fullname][tag]
                         if val is None:
                             LogError(f"Can't find {tag=} in people.keys() for {fullname}")
                             break
+                        if len(val)> 0:
+                            val=prefix+val+suffix
                         thismail=start+val+trail
 
             file.write(thismail+"\n")
