@@ -216,6 +216,7 @@ def main():
                     # All other tags come from columns of the people tab
                     else:
                         # If the tag is of the form xxx|yyy|xxx, we pass the prefix and suffix through if the center part is non-empty
+                        prefix=suffix=""
                         if tag.count("|") == 2:
                             prefix, tag, suffix=tag.split("|")
 
