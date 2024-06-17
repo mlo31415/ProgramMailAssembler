@@ -222,8 +222,8 @@ def main():
 
                         val=people[fullname][tag]
                         if val is None:
-                            LogError(f"Can't find {tag=} in people.keys() for {fullname}")
-                            break
+                            MessageLog(f"Can't find {tag=} in people.keys() for {fullname}\nAborting execution.")
+                            return
                         if len(val)> 0:
                             val=prefix+val+suffix
                         thismail=start+val+trail
