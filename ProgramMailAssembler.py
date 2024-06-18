@@ -214,13 +214,13 @@ def main():
                                         item+=f"equipment: {equipment}\n"
                                     if len(precis) > 0:
                                         item+=f"{precis}\n"
-                                    else:
-                                        item+=f"<p>{precis}</p>\n"
+                                # Add the item to the items text block
                                 items=items+item
                                 if mailFormat == "html":
                                     items=items+"<p>"
                                 items=items+"\n"
                                 continue
+                        # Assemble the opening material, the items text block ansd the closing aterian into a message
                         thismail=start+items+trail
 
                     # All other tags come from columns of the people tab
@@ -245,11 +245,7 @@ def main():
 
 
 
-
-
     LogDisplayErrorsIfAny()
-
-
 
 
 class Node:
