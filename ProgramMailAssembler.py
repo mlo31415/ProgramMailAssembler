@@ -127,11 +127,6 @@ def main():
         MessageLog(f"<selection> element does not contain a <value>...</value> element>")
         return
 
-    # Read the input file to be used
-    inputFileName, template=FindBracketedText(template, "inputFileName", stripHtml=False)
-    if len(inputFileName) == 0:
-        inputFileName="Program participant schedules email.txt"
-
     # Read the email body
     emailbody, template=FindBracketedText(template, "email body", stripHtml=False)
     if len(emailbody) == 0:
@@ -145,6 +140,12 @@ def main():
     # <email>email address</email>
     # <contents>letter...<contents>
     # </person>  ...and repeated
+
+
+    # Read the name of the input file to be used
+    inputFileName, template=FindBracketedText(template, "inputFileName", stripHtml=False)
+    if len(inputFileName) == 0:
+        inputFileName="Program participant schedules email.txt"
 
     with open(inputFileName, "w") as file:
         print(f"# {datetime.now()}\n", file=file)
