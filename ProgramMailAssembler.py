@@ -190,6 +190,7 @@ def main():
                                 title=""
                                 participants=""
                                 precis=""
+                                equipment=""
                                 for subatt in attribute.List:
                                     match subatt.Key:
                                         case "title":
@@ -198,14 +199,19 @@ def main():
                                             participants=subatt.Text
                                         case "precis":
                                             precis=subatt.Text
+                                        case "equipment":
+                                            equipment=subatt.Text
+                                # Now format this item for the email
                                 if mailFormat == "html":
                                     item=f"<p><b>{title}</b></p>\n<p>{participants}</p>\n"
+                                    if len(equipment) > 0:
+                                        item+=f"<p>equipment: {equipment}</p>\n"
                                     if len(precis) > 0:
                                         item+=f"<p>{precis}</p>\n"
                                 else:
                                     item=f"{title}\n{participants}\n"
-                                if len(precis) > 0:
-                                    if mailFormat == "html":
+                                    if len(equipment) > 0:
+                                        item+=f"equipment: {equipment}\n"
                                     if len(precis) > 0:
                                         item+=f"{precis}\n"
                                     else:
