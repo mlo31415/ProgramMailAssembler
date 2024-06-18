@@ -340,7 +340,7 @@ def CheckBalance(s: str) -> bool:
 
         # Is this a new opening delimiter?
         if delim == "[[" or delim[0] != "/":
-            m=re.match("^([a-zA-Z0-9])\s", delim)   # Check for cases like <a http=...> -- the delim is just the a
+            m=re.match("^([a-zA-Z0-9])\\s", delim)   # Check for cases like <a http=...> -- the delim is just the a
             if m is not None:
                 delim=m.groups()[0]
             nesting.append(delim)
@@ -378,8 +378,8 @@ def LocateNextDelimiter(s: str) -> tuple[Optional[str], str]:
         return "", ""
 
     # Match <stuff> followed by "<" followed by stuff not containing delimiters, followed by ">", followed by stuff
-    m1=re.match("^[^<]*?<([^<>\[\]]*?)>", s)
-    m2=re.match("^[^\[]*?\[\[([^<>\[\]]]*?)]", s)
+    m1=re.match("^[^<]*?<([^<>\\[\\]]*?)>", s)
+    m2=re.match("^[^\[]*?\[\[([^<>\\[\\]]]*?)]", s)
 
     # Neither found means we're done.
     if m1 is None and m2 is None:
