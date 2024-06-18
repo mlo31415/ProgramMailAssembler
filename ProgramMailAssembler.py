@@ -59,8 +59,8 @@ def main():
     # <precis>yyyyy</precis>
 
     # Markup is a dict keyed by the <name></name> with contents the contained markup and rooted at "main"
-    main=Node("Main", markuplines)
-    main.Resolve()
+    mainNode=Node("Main", markuplines)
+    mainNode.Resolve()
 
     # Now read the People table
     # Format: <person>pppp</person> (repeated, one line per person)
@@ -148,7 +148,7 @@ def main():
 
     with open(inputFileName, "w") as file:
         print(f"# {datetime.now()}\n", file=file)
-        for person in main:
+        for person in mainNode:
             fullname=person["full name"]
             if not people.Exists(fullname):
                 LogError(f"For {fullname}, {person['full name']=} not in People -- skipped.")
