@@ -200,10 +200,13 @@ def main():
                                             precis=subatt.Text
                                 if mailFormat == "html":
                                     item=f"<p><b>{title}</b></p>\n<p>{participants}</p>\n"
+                                    if len(precis) > 0:
+                                        item+=f"<p>{precis}</p>\n"
                                 else:
                                     item=f"{title}\n{participants}\n"
                                 if len(precis) > 0:
                                     if mailFormat == "html":
+                                    if len(precis) > 0:
                                         item+=f"{precis}\n"
                                     else:
                                         item+=f"<p>{precis}</p>\n"
